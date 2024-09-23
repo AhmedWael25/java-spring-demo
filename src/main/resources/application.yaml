@@ -1,0 +1,31 @@
+server:
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: elm-demo
+  datasource:
+    url: jdbc:h2:mem:demodb
+    driver-class-name: org.h2.Driver
+    username: admin
+    password:
+    platform: h2
+    schema: classpath:schema.sql
+    data: classpath:data.sql
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+
+
+sa:
+  elm:
+    demo:
+      jwtSecret: 2ECCD48E35ADF9C17813D4C22B4672ECCD48E35ADF9C17813D4C22B4672ECCD48E35ADF9C17813D4C22B467

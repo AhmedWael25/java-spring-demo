@@ -1,0 +1,626 @@
+openapi: 3.0.1
+info:
+  title: Demo
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      tags:
+        - Auth
+      requestBody:
+        description: User registration data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '200':
+          description: User registered successfully
+        #          content:
+        #            application/json:
+        #              schema:
+        #                $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          description: Bad Request - Invalid input or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /login:
+    post:
+      summary: Register a new user
+      operationId: loginUser
+      tags:
+        - Auth
+      requestBody:
+        description: User registration data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Unauthorized - Couldn't authenticate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/create:
+    post:
+      summary: Create a new user
+      operationId: createUser
+      tags:
+        - Users
+      requestBody:
+        description: Request body for creating a new user
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreationRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: User created successfully
+        '400':
+          description: Invalid role provided or bad request
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Invalid role provided
+        '403':
+          description: Unauthorized access (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+  /users/{id}/change-status:
+    post:
+      summary: Change User Status
+      operationId: changeUserStatus
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User Statues Changed successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: User Statues Changed successfully
+        '404':
+          description: UserDoesNot Exist
+          content:
+            application/json:
+              schema:
+                type: string
+                example: UserDoesNot Exist
+
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+  /products:
+    get:
+      summary: Get Dealer Products
+      operationId: getProducts
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: Number of products to return per page (default is 10).
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: offset
+          in: query
+          description: Starting point for the products list (default is 0).
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '404':
+          description: UserDoesNot Exist
+          content:
+            application/json:
+              schema:
+                type: string
+                example: UserDoesNot Exist
+
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+  /products/add:
+    post:
+      summary: Add a new product
+      description: Create a new product by providing its name, price, status, and associated user ID.
+      operationId: addProduct
+      tags:
+        - Products
+      requestBody:
+        description: Product creation request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreationRequest'
+      responses:
+        '200':
+          description: Product successfully created
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+  /products/{id}/change-status:
+    post:
+      summary: Toggle the product status
+      description: Change the product's status from ACTIVE to INACTIVE or from INACTIVE to ACTIVE.
+      operationId: changeProductStatus
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          description: Product ID to change the status for.
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Product status successfully updated
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+  /products/user:
+    get:
+      summary: Get active products with pagination
+      description: Retrieve all active products with pagination based on limit and offset.
+      operationId: getActiveProducts
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: Number of products to return per page (default is 10).
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: offset
+          in: query
+          description: Starting point for the products list (default is 0).
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Successful response with paginated list of active products.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+  /products/admin:
+    get:
+      summary: Get All products with pagination
+      description: Retrieve all products with pagination based on limit and offset.
+      operationId: getAllProducts
+      tags:
+        - Products
+      parameters:
+        - name: limit
+          in: query
+          description: Number of products to return per page (default is 10).
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+        - name: offset
+          in: query
+          description: Starting point for the products list (default is 0).
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Successful response with paginated list of all products.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+  /products/statistics:
+    get:
+      summary: Get product statistics
+      description: Retrieve various product statistics with optional date range filtering. If `from` and `to` query parameters are provided, statistics are calculated within the date range; otherwise, the statistics are calculated for all products.
+      operationId: getProductStatistics
+      tags:
+        - Products
+      parameters:
+        - name: from
+          in: query
+          description: The start date for filtering products (optional).
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2023-01-01"
+        - name: to
+          in: query
+          description: The end date for filtering products (optional).
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2023-12-31"
+      responses:
+        '200':
+          description: Successfully retrieved product statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+        '400':
+          description: Invalid date format or parameters
+        '401':
+          description: UnAuthenticated (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+        '403':
+          description: Unauthorized (admin only)
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Access denied
+      security:
+        - bearerAuth: [ ]
+
+components:
+  schemas:
+    RegistrationRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        password:
+          type: string
+          format: password
+          example: MySecurePassword123
+    RegistrationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: User registered successfully
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: User username
+        password:
+          type: string
+          example: password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: User JWT Token
+
+    UserCreationRequest:
+      type: object
+      required:
+        - username
+        - email
+        - address
+        - password
+        - role
+      properties:
+        username:
+          type: string
+          example: newUser
+        email:
+          type: string
+          example: newUser@example.com
+        password:
+          type: string
+          format: password
+          example: MySecurePassword
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - DEALER
+          example: DEALER
+
+    ProductsResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+          example: 10
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductItem'
+
+    ProductItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+        dealerName:
+          type: string
+        price:
+          type: number
+          format: double
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+
+    ProductCreationRequest:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          example: Product A
+        price:
+          type: number
+          format: double
+          example: 29.99
+
+    StatisticsResponse:
+      type: object
+      properties:
+        products:
+          $ref: '#/components/schemas/ProductStatisticsResponse'
+        dealers:
+          $ref: '#/components/schemas/DealersStatisticsResponse'
+        clients:
+          $ref: '#/components/schemas/ClientsStatisticsResponse'
+    ProductStatisticsResponse:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+          format: int64
+          description: The total number of products
+          example: 100
+        active:
+          type: integer
+          format: int64
+          description: The total number of active products
+          example: 60
+        inactive:
+          type: integer
+          format: int64
+          description: The total number of inactive products
+          example: 40
+        totalPrice:
+          type: number
+          format: double
+          description: The total sum of prices for active products
+          example: 45000.75
+        lowest:
+          $ref: '#/components/schemas/ProductSummary'
+        highest:
+          $ref: '#/components/schemas/ProductSummary'
+    ProductSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The ID of the product
+          example: 5
+        dealerName:
+          type: string
+          description: The username of the product's dealer
+          example: john_doe
+        name:
+          type: string
+          description: The name of the product
+          example: "Low Price Product"
+        price:
+          type: number
+          format: double
+          description: The price of the product
+          example: 10.99
+    DealersStatisticsResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        hasProducts:
+          type: integer
+          format: int64
+        hasNoProducts:
+          type: integer
+          format: int64
+    ClientsStatisticsResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          format: int64
+        active:
+          type: integer
+          format: int64
+        inactive:
+          type: integer
+          format: int64
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Username is already take
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+
